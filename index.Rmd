@@ -154,5 +154,24 @@ plot_rainfall("PERTH", 2000)
 
 Function Design: First, I check to see if the city and year are valid. If not, I throw an error.
 
+## Part 4
+### part a)
+```{r part 4a}
+rain_df <- df %>% filter(year >= 2014) %>% group_by(city_name, year) %>% drop_na() %>% summarise(mean = sample_mean(rainfall), sd = sample_sd(rainfall), lower_bound = calculate_CI(rainfall)[1], upper_bound = calculate_CI(rainfall)[2])
+
+rain_df
+
+```
+
+```{r part 4b}
+ggplot(rain_df, aes(x = year, y = mean)) + geom_point() + facet_wrap(~city_name)
+
+
+```
+
+
+
+
+
 
 
