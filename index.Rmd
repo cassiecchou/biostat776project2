@@ -9,16 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Set Up
-```{r backgroundsetup}
-library("tidytuesdayR")
-library("tidyverse")
-
-```
-
 ## Part 1
 ### part a)
 ```{r part 1a}
+library(tidyverse)
+library(tidytuesdayR)
+
 Exp <- function(x, k) {
   exp_val <- 1
   for (i in 1:k) {
@@ -135,10 +131,28 @@ ggplot(data = df %>% filter(year >= 2014), aes(x = date, y = temperature)) + geo
 
 ### part b)
 ```{r part 3b}
+plot_rainfall <- function(city_name, year) {
+  if (city_name %in% df$city_name == FALSE) {
+    stop("Invalid City!")
+  }
+  
+  if (year %in% df$year == FALSE) {
+    stop("Invalid Year!")
+  }
+  
+  plot_title <- paste("Rainfall in", str_to_title(city_name), "During the Year", year, sep = " ")
+  
+  df %>%
+    filter(city_name == city_name, year == year) %>%
+    ggplot(aes(log(rainfall))) +
+    geom_histogram(bins = 40) + xlab("Log of Rainfall") + ylab("Count of Places/Times with Rainfall") + labs(title = plot_title)
+}
 
+plot_rainfall("PERTH", 2000)
 
 ```
 
+Function Design: First, I check to see if the city and year are valid. If not, I throw an error.
 
 
 
