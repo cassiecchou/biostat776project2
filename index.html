@@ -357,8 +357,164 @@ display: none;
 </div>
 
 
+<div id="set-up" class="section level2">
+<h2>Set Up</h2>
+<pre class="r"><code>library(&quot;tidytuesdayR&quot;)
+library(&quot;tidyverse&quot;)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.2     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
 <div id="part-1" class="section level2">
 <h2>Part 1</h2>
+<div id="part-a" class="section level3">
+<h3>part a)</h3>
+<pre class="r"><code>Exp &lt;- function(x, k) {
+  exp_val &lt;- 1
+  for (i in 1:k) {
+    exp_val &lt;- exp_val + x^i/factorial(i)
+  }
+  exp_val
+}
+
+Exp(3, 2)</code></pre>
+<pre><code>## [1] 8.5</code></pre>
+</div>
+<div id="part-b" class="section level3">
+<h3>part b)</h3>
+<pre class="r"><code>sample_mean &lt;- function(x) {
+  n &lt;- length(x)
+  mean_val &lt;- 0
+  for (i in 1:n) {
+    mean_val &lt;- mean_val + x[i]
+  }
+  
+  mean_val/n
+}
+
+sample_sd &lt;- function(x) {
+  n &lt;- length(x)
+  sd_val &lt;- 0
+  mean_x &lt;- sample_mean(x)
+  
+  for (i in 1:n) {
+    sd_val &lt;- sd_val + (x[i] - mean_x)^2
+  }
+  
+  sd_val &lt;- 1/(n-1) * sd_val
+  sqrt(sd_val)
+}
+
+sample_mean(c(1, 2, 3, 4, 5))</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>sample_sd(c(1, 2, 3, 4, 5))</code></pre>
+<pre><code>## [1] 1.581139</code></pre>
+</div>
+<div id="part-c" class="section level3">
+<h3>part c)</h3>
+<pre class="r"><code>calculate_CI &lt;- function(x, conf = 0.95) {
+  alpha &lt;- 1 - conf
+  degrees_freedom &lt;- length(x) - 1
+  t_score &lt;- qt(p = alpha / 2, df = degrees_freedom, lower.tail = FALSE)
+  
+  mean_x &lt;- mean(x)
+  se_x &lt;- sd(x)/sqrt(length(x))
+  lower_bound &lt;- mean(x) - t_score*se_x
+  upper_bound &lt;- mean(x) + t_score*se_x
+  
+  c(lower_bound, upper_bound)
+}
+
+# Test
+x &lt;- c(1:100)
+dat &lt;- data.frame(x = x)
+fit &lt;- lm(x ~ 1, dat)
+
+# Calculate a 95% confidence interval
+confint(fit, level = 0.95)</code></pre>
+<pre><code>##                2.5 %   97.5 %
+## (Intercept) 44.74349 56.25651</code></pre>
+<pre class="r"><code>calculate_CI(x)</code></pre>
+<pre><code>## [1] 44.74349 56.25651</code></pre>
+</div>
+</div>
+<div id="part-2" class="section level2">
+<h2>Part 2</h2>
+<pre class="r"><code>library(here)</code></pre>
+<pre><code>## here() starts at C:/Users/Home2/Documents/Stats Computing/biostat776project2</code></pre>
+<pre class="r"><code>if (!file.exists(here(&quot;data&quot;, &quot;tuesdata_rainfall.RDS&quot;))) {
+    tuesdata &lt;- tidytuesdayR::tt_load(&quot;2020-01-07&quot;)
+    rainfall &lt;- tuesdata$rainfall
+    temperature &lt;- tuesdata$temperature
+
+    # save the files to RDS objects
+    saveRDS(tuesdata$rainfall, file = here(&quot;data&quot;, &quot;tuesdata_rainfall.RDS&quot;))
+    saveRDS(tuesdata$temperature, file = here(&quot;data&quot;, &quot;tuesdata_temperature.RDS&quot;))
+}
+
+rainfall &lt;- readRDS(here(&quot;data&quot;, &quot;tuesdata_rainfall.RDS&quot;))
+temperature &lt;- readRDS(here(&quot;data&quot;, &quot;tuesdata_temperature.RDS&quot;))
+
+library(tidyverse)
+library(dplyr)
+
+glimpse(rainfall)</code></pre>
+<pre><code>## Rows: 179,273
+## Columns: 11
+## $ station_code &lt;chr&gt; &quot;009151&quot;, &quot;009151&quot;, &quot;009151&quot;, &quot;009151&quot;, &quot;009151&quot;, &quot;009151…
+## $ city_name    &lt;chr&gt; &quot;Perth&quot;, &quot;Perth&quot;, &quot;Perth&quot;, &quot;Perth&quot;, &quot;Perth&quot;, &quot;Perth&quot;, &quot;Pe…
+## $ year         &lt;dbl&gt; 1967, 1967, 1967, 1967, 1967, 1967, 1967, 1967, 1967, 196…
+## $ month        &lt;chr&gt; &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01…
+## $ day          &lt;chr&gt; &quot;01&quot;, &quot;02&quot;, &quot;03&quot;, &quot;04&quot;, &quot;05&quot;, &quot;06&quot;, &quot;07&quot;, &quot;08&quot;, &quot;09&quot;, &quot;10…
+## $ rainfall     &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ period       &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ quality      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ lat          &lt;dbl&gt; -31.96, -31.96, -31.96, -31.96, -31.96, -31.96, -31.96, -…
+## $ long         &lt;dbl&gt; 115.79, 115.79, 115.79, 115.79, 115.79, 115.79, 115.79, 1…
+## $ station_name &lt;chr&gt; &quot;Subiaco Wastewater Treatment Plant&quot;, &quot;Subiaco Wastewater…</code></pre>
+<pre class="r"><code>glimpse(temperature)</code></pre>
+<pre><code>## Rows: 528,278
+## Columns: 5
+## $ city_name   &lt;chr&gt; &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PER…
+## $ date        &lt;date&gt; 1910-01-01, 1910-01-02, 1910-01-03, 1910-01-04, 1910-01-0…
+## $ temperature &lt;dbl&gt; 26.7, 27.0, 27.5, 24.0, 24.8, 24.4, 25.3, 28.0, 32.6, 35.9…
+## $ temp_type   &lt;chr&gt; &quot;max&quot;, &quot;max&quot;, &quot;max&quot;, &quot;max&quot;, &quot;max&quot;, &quot;max&quot;, &quot;max&quot;, &quot;max&quot;, &quot;m…
+## $ site_name   &lt;chr&gt; &quot;PERTH AIRPORT&quot;, &quot;PERTH AIRPORT&quot;, &quot;PERTH AIRPORT&quot;, &quot;PERTH …</code></pre>
+<pre class="r"><code>df &lt;- rainfall %&gt;% drop_na() %&gt;% mutate(date = ymd(paste(year, month, day, sep = &quot;-&quot;))) %&gt;% select(-month, -day)
+df$city_name &lt;- str_to_upper(df$city_name)
+
+df &lt;- inner_join(df, temperature, by = c(&quot;city_name&quot;,  &quot;date&quot;), relationship =
+  &quot;many-to-many&quot;)
+
+glimpse(df)</code></pre>
+<pre><code>## Rows: 83,964
+## Columns: 13
+## $ station_code &lt;chr&gt; &quot;009151&quot;, &quot;009151&quot;, &quot;009151&quot;, &quot;009151&quot;, &quot;009151&quot;, &quot;009151…
+## $ city_name    &lt;chr&gt; &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PERTH&quot;, &quot;PE…
+## $ year         &lt;dbl&gt; 1967, 1967, 1967, 1967, 1967, 1967, 1967, 1967, 1967, 196…
+## $ rainfall     &lt;dbl&gt; 2.8, 2.8, 4.8, 4.8, 5.8, 5.8, 16.0, 16.0, 1.0, 1.0, 1.0, …
+## $ period       &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ quality      &lt;chr&gt; &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y…
+## $ lat          &lt;dbl&gt; -31.96, -31.96, -31.96, -31.96, -31.96, -31.96, -31.96, -…
+## $ long         &lt;dbl&gt; 115.79, 115.79, 115.79, 115.79, 115.79, 115.79, 115.79, 1…
+## $ station_name &lt;chr&gt; &quot;Subiaco Wastewater Treatment Plant&quot;, &quot;Subiaco Wastewater…
+## $ date         &lt;date&gt; 1967-07-05, 1967-07-05, 1967-07-06, 1967-07-06, 1967-07-…
+## $ temperature  &lt;dbl&gt; 17.8, 8.7, 18.4, 8.0, 17.2, 10.5, 16.1, 4.4, 16.8, 4.1, 2…
+## $ temp_type    &lt;chr&gt; &quot;max&quot;, &quot;min&quot;, &quot;max&quot;, &quot;min&quot;, &quot;max&quot;, &quot;min&quot;, &quot;max&quot;, &quot;min&quot;, &quot;…
+## $ site_name    &lt;chr&gt; &quot;PERTH AIRPORT&quot;, &quot;PERTH AIRPORT&quot;, &quot;PERTH AIRPORT&quot;, &quot;PERTH…</code></pre>
+</div>
+<div id="part-3" class="section level2">
+<h2>Part 3</h2>
+<div id="part-a-1" class="section level3">
+<h3>part a)</h3>
+</div>
 </div>
 
 
