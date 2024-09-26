@@ -24,6 +24,7 @@ Exp <- function(x, k) {
 }
 
 Exp(3, 2)
+Exp(3, 100)
 
 ```
 ### part b)
@@ -54,6 +55,9 @@ sample_sd <- function(x) {
 sample_mean(c(1, 2, 3, 4, 5))
 sample_sd(c(1, 2, 3, 4, 5))
 
+sample_mean(c(1, 4, 6, 5, 8, 1))
+sample_sd(c(1, 4, 6, 5, 8, 1))
+
 ```
 
 
@@ -81,6 +85,10 @@ fit <- lm(x ~ 1, dat)
 confint(fit, level = 0.95)
 
 calculate_CI(x)
+
+# Calculate a 90% confidence interval
+confint(fit, level = 0.9)
+calculate_CI(x, 0.9)
 
 ```
 
@@ -124,35 +132,47 @@ glimpse(df)
 ```{r part 3a}
 library(ggplot2)
 
-ggplot(data = df %>% filter(year >= 2014), aes(x = date, y = temperature)) + geom_point(aes(color = temp_type)) + facet_wrap(~city_name) + labs(title = "Temperature over Time, Sorted by City", color = "Temperature Type") + xlab("Date") + ylab("Temperature")
+ggplot(data = df %>% filter(year >= 2014), aes(x = date, y = temperature)) + geom_point(aes(color = temp_type)) + facet_wrap(~city_name, scales = "free_y") + labs(title = "Temperature over Time, Sorted by City", color = "Temperature Type") + xlab("Date") + ylab("Temperature")
 
 ```
 
 
 ### part b)
 ```{r part 3b}
+library(extrafont)
+
 plot_rainfall <- function(city_name, year) {
-  if (city_name %in% df$city_name == FALSE) {
+  city_nm <- city_name
+  yr <- year
+  
+  if (city_nm %in% df$city_name == FALSE) {
     stop("Invalid City!")
   }
   
-  if (year %in% df$year == FALSE) {
+  if (yr %in% df$year == FALSE) {
     stop("Invalid Year!")
   }
   
-  plot_title <- paste("Rainfall in", str_to_title(city_name), "During the Year", year, sep = " ")
+  df_city_year <- df %>% filter(city_name == city_nm, year == yr)
   
-  df %>%
-    filter(city_name == city_name, year == year) %>%
-    ggplot(aes(log(rainfall))) +
-    geom_histogram(bins = 40) + xlab("Log of Rainfall") + ylab("Count of Places/Times with Rainfall") + labs(title = plot_title)
+  if(count(df_city_year) == 0) {
+    stop("No combinations of this city/year!")
+  }
+  
+  plot_title <- paste("Rainfall in", str_to_title(city_nm), "During the Year", yr, sep = " ")
+  
+  ggplot(df_city_year, aes(log(rainfall))) +
+  geom_histogram(binwidth = 0.3, fill = "#094b7c") + xlab("Log(Rainfall)") + ylab("Count of Rainfall Events") + labs(title = plot_title) +
+  theme(plot.title = element_text(family = "Segoe UI Black", size = 10), axis.title.x = element_text(family = "Segoe UI Semilight"), axis.title.y = element_text(family = "Segoe UI Semilight"), panel.background = element_rect(fill = "#c3edff"))
 }
 
 plot_rainfall("PERTH", 2000)
+plot_rainfall("CANBERRA", 2014)
+plot_rainfall("MELBOURNE", 1999)
 
 ```
 
-Function Design: First, I check to see if the city and year are valid. If not, I throw an error.
+Function Design: First, I check to see if the city and year are valid. If not, I throw an error. Then, I filter the data, and check to see that there is at least one point in this city/year combination. If not, I throw an error saying that this city/year combination is not valid. Then, I create the plot title, and create the plot. I relabeled the axes and the title for clarity and interpretability. I added a bin width in case of city/year combinations with varying dataset sizes, and some color to the plot for aesthetics.
 
 ## Part 4
 ### part a)
@@ -164,8 +184,9 @@ rain_df
 ```
 
 ```{r part 4b}
-ggplot(rain_df, aes(x = year, y = mean)) + geom_point() + facet_wrap(~city_name)
+rain_df %>% ggplot(aes(x = year, y = mean)) + geom_point() + geom_line() + geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 0.3) + facet_wrap(~city_name) + xlab("Year") + ylab("Mean Amount of Rainfall (mm)") + labs(title = "Mean Amounts of Rainfall in Australia from 2014-2019", subtitle = "Trends in Five Austrailian Metropolitan Cities with Fixed Scale Axes")
 
+rain_df %>% ggplot(aes(x = year, y = mean)) + geom_point() + geom_line() + geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 0.3) + facet_wrap(~city_name, scales = "free_y") + xlab("Year") + ylab("Mean Amount of Rainfall (mm)") + labs(title = "Mean Amounts of Rainfall in Australia from 2014-2019", subtitle = "Trends in Five Austrailian Metropolitan Cities with Plot-Defined Axes")
 
 ```
 
