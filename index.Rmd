@@ -131,18 +131,19 @@ glimpse(df)
 ### part a)
 ```{r part 3a}
 library(ggplot2)
+library(extrafont)
 
-ggplot(data = df %>% filter(year >= 2014), aes(x = date, y = temperature)) + geom_point(aes(color = temp_type)) + facet_wrap(~city_name, scales = "free_y") + labs(title = "Temperature over Time, Sorted by City", color = "Temperature Type") + xlab("Date") + ylab("Temperature")
+ggplot(data = df %>% filter(year >= 2014), aes(x = date, y = temperature)) + geom_point(aes(color = temp_type)) + facet_wrap(~city_name, scales = "free_y") + labs(title = "Temperature over Time, Sorted by City", subtitle = "Maximum and Minimum Temperatures Fluctate During the Year Across All Cities, \nPeaking Around the Beginning of the Year", caption = "Data Sourced from Tidy Tuesday", color = "Temperature Type") + xlab("Year") + ylab("Temperature (in Celsius)") + theme(plot.title = element_text(family = "Segoe UI Black", size = 16), axis.title.x = element_text(family = "Segoe UI Semilight"), axis.title.y = element_text(family = "Segoe UI Semilight"), plot.subtitle = element_text(family = "Segoe UI Semilight"), plot.caption = element_text(family = "Segoe UI Semilight", size = 11), panel.background = element_rect(fill = "#fff1da"))
+  
+  
 
 ```
 
 
 ### part b)
 ```{r part 3b}
-library(extrafont)
-
 plot_rainfall <- function(city_name, year) {
-  city_nm <- city_name
+  city_nm <- str_to_upper(city_name)
   yr <- year
   
   if (city_nm %in% df$city_name == FALSE) {
@@ -160,19 +161,19 @@ plot_rainfall <- function(city_name, year) {
   }
   
   plot_title <- paste("Rainfall in", str_to_title(city_nm), "During the Year", yr, sep = " ")
+  plot_subtitle <- "Exploring the Distribution of Rainfall on a Log Scale"
   
   ggplot(df_city_year, aes(log(rainfall))) +
-  geom_histogram(binwidth = 0.3, fill = "#094b7c") + xlab("Log(Rainfall)") + ylab("Count of Rainfall Events") + labs(title = plot_title) +
-  theme(plot.title = element_text(family = "Segoe UI Black", size = 10), axis.title.x = element_text(family = "Segoe UI Semilight"), axis.title.y = element_text(family = "Segoe UI Semilight"), panel.background = element_rect(fill = "#c3edff"))
+  geom_histogram(binwidth = 0.3, fill = "#094b7c") + xlab("Log(Rainfall)") + ylab("Count of Rainfall Events") + labs(title = plot_title, subtitle = plot_subtitle, caption = "Data Sourced from Tidy Tuesday") +
+  theme(plot.title = element_text(family = "Segoe UI Black", size = 16), plot.subtitle = element_text(family = "Segoe UI Semilight"), axis.title.x = element_text(family = "Segoe UI Semilight"), plot.caption = element_text(family = "Segoe UI Semilight", size = 11), axis.title.y = element_text(family = "Segoe UI Semilight"), panel.background = element_rect(fill = "#c3edff"))
 }
 
 plot_rainfall("PERTH", 2000)
-plot_rainfall("CANBERRA", 2014)
 plot_rainfall("MELBOURNE", 1999)
 
 ```
 
-Function Design: First, I check to see if the city and year are valid. If not, I throw an error. Then, I filter the data, and check to see that there is at least one point in this city/year combination. If not, I throw an error saying that this city/year combination is not valid. Then, I create the plot title, and create the plot. I relabeled the axes and the title for clarity and interpretability. I added a bin width in case of city/year combinations with varying dataset sizes, and some color to the plot for aesthetics.
+Function Design: First, I convert the city name to all captials so that if someone typed "Perth" or "perth" it would still be a valid city name. Then, I check to see if the city and year are valid. If not, I throw an error. Then, I filter the data, and check to see that there is at least one point in this city/year combination. If not, I throw an error saying that this city/year combination is not valid. Then, I create the plot title, and create the plot. I relabeled the axes and the title for clarity and interpretability. I added a bin width in case of city/year combinations with varying dataset sizes, and some color to the plot for aesthetics.
 
 ## Part 4
 ### part a)
@@ -184,15 +185,12 @@ rain_df
 ```
 
 ```{r part 4b}
-rain_df %>% ggplot(aes(x = year, y = mean)) + geom_point() + geom_line() + geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 0.3) + facet_wrap(~city_name) + xlab("Year") + ylab("Mean Amount of Rainfall (mm)") + labs(title = "Mean Amounts of Rainfall in Australia from 2014-2019", subtitle = "Trends in Five Austrailian Metropolitan Cities with Fixed Scale Axes")
+rain_df %>% ggplot(aes(x = year, y = mean)) + geom_point() + geom_line() + geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 0.3) + facet_wrap(~city_name) + xlab("Year") + ylab("Mean Amount of Rainfall (mm)") + labs(title = "Mean Amounts of Rainfall in Australia from 2014-2019", subtitle = "Trends in Five Austrailian Metropolitan Cities with Fixed Scale Axes\nHigher Amounts of Rain in Melbourne and Perth, with Overall Decreasing Amounts of Mean Rainfall", caption = "Data Sourced from Tidy Tuesday") + theme(plot.title = element_text(family = "Segoe UI Black", size = 16), axis.title.x = element_text(family = "Segoe UI Semilight"), plot.caption = element_text(family = "Segoe UI Semilight", size = 11), axis.title.y = element_text(family = "Segoe UI Semilight"), plot.subtitle = element_text(family = "Segoe UI Semilight"), panel.background = element_rect(fill = "#e5f5ff"), strip.background = element_rect(fill = "#c9d3d9"))
 
-rain_df %>% ggplot(aes(x = year, y = mean)) + geom_point() + geom_line() + geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 0.3) + facet_wrap(~city_name, scales = "free_y") + xlab("Year") + ylab("Mean Amount of Rainfall (mm)") + labs(title = "Mean Amounts of Rainfall in Australia from 2014-2019", subtitle = "Trends in Five Austrailian Metropolitan Cities with Plot-Defined Axes")
+rain_df %>% ggplot(aes(x = year, y = mean)) + geom_point() + geom_line() + geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 0.3) + facet_wrap(~city_name, scales = "free_y") + xlab("Year") + ylab("Mean Amount of Rainfall (mm)") + labs(title = "Mean Amounts of Rainfall in Australia from 2014-2019", subtitle = "Trends in Five Austrailian Metropolitan Cities with City-Defined Axes\nMostly fluctuating amounts of mean rainfall, with a slight trend towards decreasing amounts of rain", caption = "Data Sourced from Tidy Tuesday") + theme(plot.title = element_text(family = "Segoe UI Black", size = 16), axis.title.x = element_text(family = "Segoe UI Semilight"), plot.subtitle = element_text(family = "Segoe UI Semilight"), plot.caption = element_text(family = "Segoe UI Semilight", size = 11), axis.title.y = element_text(family = "Segoe UI Semilight"), panel.background = element_rect(fill = "#e5f5ff"), strip.background = element_rect(fill = "#c9d3d9"))
 
 ```
 
-
-
-
-
+I plotted two plots with different y-scaling because it is important to see individualized trends in the data by city (city-defined axes), but it is also important to see how rainfall compares between the cities (fixed-scale axes).
 
 
